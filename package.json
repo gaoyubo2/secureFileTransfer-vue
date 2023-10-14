@@ -16,6 +16,7 @@
     "axios": "^1.5.1",
     "cors": "^2.8.5",
     "element-ui": "^2.15.14",
+    "naive-ui": "^2.35.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vue-simple-uploader": "^0.7.6",

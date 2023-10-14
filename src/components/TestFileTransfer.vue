@@ -1,79 +1,98 @@
 <template>
   <div>
-    <h1>文件上传测试</h1>
-    <input type="file" ref="fileInput" @change="handleFileChange" />
-    <button @click="uploadFile">上传文件</button>
+    <div class="uploadDiv">
+      <uploader
+        ref="uploader"
+        :options="uploadOptions"
+        :autoStart="true"
+        :files="files"
+        @file-added="onFileAdded"
+        @file-success="onFileSuccess"
+        @file-progress="onFileProgress"
+        @file-error="onFileError"
+        class="uploader-app"
+      >
+        <uploader-unsupport></uploader-unsupport>
+        <uploader-drop>
+          <uploader-btn :attrs="attrs">在当前文件夹上传文件</uploader-btn>
+        </uploader-drop>
+        <uploader-list></uploader-list>
+      </uploader>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+
+/* eslint-disable */
+import {Message} from "element-ui";
 
 export default {
-  name: 'TestFileTransfer',
+  props: {
+    currentPath: String
+  },
+  name: "TestFileTransfer",
   data() {
     return {
-      selectedFile: null,
-      fileInfo:{
+      files: [],
+      uploadOptions: {
+        target: "https://gaoyubo.cn/file/chunk",
+        chunkSize: 1024 * 1024,
+        testChunks: true,
+        //失败后最多自动重试上传次数
+        maxChunkRetries: 3,
+        checkChunkUploadedByResponse: function(chunk, message) {
+          let objMessage = JSON.parse(message);
+          let chunkNumbers = objMessage.chunkNumbers;
+          return (chunkNumbers || []).indexOf(chunk.offset + 1) >= 0;
+        },
+        query() {},
+        categaryMap: {
+          image: ["gif", "jpg", "jpeg", "png", "bmp"],
+          zip: ["zip"],
+          document: ["csv"]
+        }
       },
-      selectedStoragePath: "D://tempFile",
+      attrs: {},
+      panelShow: false, //选择文件后，展示上传panel
+      collapse: false,
     };
   },
   methods: {
-    handleFileChange(event) {
-      this.selectedFile = event.target.files[0];
+    onFileAdded(file) {
+      Message({
+        message: "选择文件成功",
+        type: 'success',
+        duration: 5 * 1000
+      })
     },
-
-    part(fileSize,chunkSize,chunkCount,currentChunk){
-
-    },
-    uploadFile() {
-      if (this.selectedFile) {
-        //初始化
-        const formData = new FormData();
-        formData.append("file", this.selectedFile);
-        this.$store.dispatch('fileStart',formData).then((res) => {
-          // console.log(11)
-          this.fileInfo = res.file;
-
-          const fileSize = this.selectedFile.size;
-          const chunkSize = 102400; // 100KB 每个块的大小
-          const chunkCount = Math.ceil(fileSize / chunkSize);
-          let currentChunk = 0;
-
-          const uploadNextChunk = () => {
-            if (currentChunk < chunkCount) {
-              const start = currentChunk * chunkSize;
-              const end = Math.min(start + chunkSize, fileSize);
-              const chunk = this.selectedFile.raw.slice(start, end);
-              console.log("start:")
-              console.log(start)
-              console.log("end:")
-              console.log(end)
-              console.log("fileSize:")
-              console.log(fileSize)
-              const formData = new FormData();
-              formData.append("file", chunk);
-              console.log(currentChunk)
-
-              // 上传当前块
-              this.$store.dispatch("uploadFilePart",{
-                fileId:this.fileInfo.fileId,
-                storagePath:this.selectedStoragePath,
-                chunkNumber: currentChunk + 1,
-                file:formData.get("file")
-              }).then((res) => {
-                this.fileInfo = res.file;
-                currentChunk++;
-                uploadNextChunk(); // 上传下一个块
-              });
-            }
-          };
-
-          uploadNextChunk();
-        });
-
+    onFileProgress(rootFile, file, chunk) {},
+    onFileSuccess(rootFile, file, response, chunk) {
+      let res = JSON.parse(response);
+      console.log("------------")
+      console.log(response)
+      if (res.code !== 205) {
+        return;
       }
+      if (res.code === 205) {
+        const formData = new FormData();
+        formData.append("identifier", file.uniqueIdentifier);
+        formData.append("filename", file.name);
+        console.log("currentPath")
+        console.log(this.currentPath)
+        formData.append("relativePath",this.currentPath)
+        this.$store.dispatch("merge",formData).then((res)=>{
+          console.log(res)
+        });
+      } else {
+      }
+    },
+    onFileError(rootFile, file, response, chunk) {
+      Message({
+        message: "上传失败",
+        type: 'error',
+        duration: 5 * 1000
+      })
     }
   }
 };
