@@ -1,16 +1,13 @@
-const webpack = require('api')
+const path = require('path');
+const fs = require('fs');
+const viteBasicSslPlugin = require('@vitejs/plugin-basic-ssl');
+
 module.exports = {
-  devServer: {
-    proxy: {
-      //名字可以自定义，这里我用的是api
-      '/api': {
-        target: 'https://gaoyubo2',//设置你调用的接口域名和端口号（目标IP：端口）
-        changeOrigin: true,
-        ws: true,
-        pathRewrite: {
-          '^/api': ''
-        }
-      }
-    }
-  }
+  server: {
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, "D://SSL证书//gaoyubo.cn_nginx//gaoyubo.cn_nginx//gaoyubo.cn.key")),
+      cert: fs.readFileSync(path.resolve(__dirname, "D://SSL证书//gaoyubo.cn_nginx//gaoyubo.cn_nginx//gaoyubo.cn_bundle.crt")),
+    },
+  },
+  plugins: [viteBasicSslPlugin()],
 };

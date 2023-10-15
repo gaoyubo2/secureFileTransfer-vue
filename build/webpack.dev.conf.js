@@ -9,9 +9,13 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
+const fs = require('fs'); // 引入fs模块
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
+const privateKey = fs.readFileSync(path.join(__dirname, "//gaoyubo.cn.key"), 'utf8');
+const certificate = fs.readFileSync(path.join(__dirname, "//gaoyubo.cn_bundle.pem"), 'utf8');
+
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -23,6 +27,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   // these devServer options should be customized in /config/user.js
   devServer: {
     clientLogLevel: 'warning',
+    https:{
+      key : privateKey,
+      cert: certificate
+    },
     historyApiFallback: {
       rewrites: [
         { from: /.*/, to: path.posix.join(config.dev.assetsPublicPath, 'index.html') },

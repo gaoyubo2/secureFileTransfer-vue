@@ -2,24 +2,33 @@ import axios from "axios";
 import {getToken} from "./token";
 import store from "../store/user";
 import {Message} from "element-ui";
+import router from "../router";
 
 let request = axios.create({
-  baseURL: "https://gaoyubo.cn",
-  // timeout: 5000,
-  // headers: {
-  //   "content-type": "application/json",
-  // }
+  baseURL: "https://gaoyubo.cn:8888",
 });
 
 // request拦截器
 request.interceptors.request.use(
   config => {
-    console.log(config)
-    if (store.getters.token) {
-      config.headers['token'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+    //console.log(config.url)
+    //不属于注册登录
+    if (config.url === "user/login"){
+      return config;
+    }else {
+      //存在token
+      if (store.state.token) {
+        config.headers.token = getToken()
+        return config;
+      } else {
+        //不存在token
+        router.replace({
+          path: '/login'
+        })
+        alert("请先登录")
+        location.reload()
+      }
     }
-    // console.log(config)
-    return config
   },
   error => {
     Promise.reject(error)

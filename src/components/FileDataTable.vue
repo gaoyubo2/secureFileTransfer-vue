@@ -1,5 +1,7 @@
 <template>
   <div>
+    <el-button class="welcome">欢迎您：{{userInfo.username}}<i class="el-icon-view el-icon--right"></i> </el-button>
+
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item>
         <el-link v-on:click="navigate('/')" :underline="false" >根目录</el-link>
@@ -13,38 +15,38 @@
       </el-breadcrumb-item>
     </el-breadcrumb>
     <el-divider></el-divider>
-    <TestFileTransfer v-if="currentPath !== '/' " :currentPath="currentPath"/>
+    <FileUpload v-if="currentPath !== '/' " :currentPath="currentPath"/>
     <el-table
       :data="tableData">
       <el-table-column
         prop="directoryName"
         label="名称"
-        width="700">
+        width="650">
         <template v-slot:default="scope">
           <el-link v-if="scope.row.isDirectory" v-on:click="getDirectories(scope.row)" :underline="false">{{scope.row.directoryName}}</el-link>
           <el-link v-else disabled v-on:click="getDirectories(scope.row)" :underline="false">{{scope.row.directoryName}}</el-link>
         </template>
-
-
       </el-table-column>
       <el-table-column
         prop="createdAt"
         label="修改时间"
-        width="200">
+        width="210">
       </el-table-column>
       <el-table-column
         prop="size"
         label="大小"
-        width="120">
+        width="110">
         <template v-slot:default="scope" >
           <span v-if="!scope.row.isDirectory">{{convertByte(scope.row.size)}}</span>
         </template>
       </el-table-column>
       <el-table-column
         label="操作"
-        width="100">
-        <template v-slot:default="scope">
-          <el-button @click="downLoad(scope.row)" type="text" size="small">下载</el-button>
+        width="150">
+        <template  v-slot:default="scope">
+          <el-link v-if="!scope.row.isDirectory"  :underline="false" type="primary" :href="['https://gaoyubo.cn:8888/file/download?directoryPath='+scope.row.directoryPath.replace(/\\/g,'//')]" download>下载</el-link>
+          <el-link v-else underline disabled>下载</el-link>
+          <el-link style="padding-left: 20px" :underline="false" type="danger">删除</el-link>
         </template>
       </el-table-column>
     </el-table>
@@ -54,10 +56,10 @@
 </template>
 
 <script>
-import TestFileTransfer from "./TestFileTransfer.vue";
+import FileUpload from "./FileUpload.vue";
 
 export default {
-  components: {TestFileTransfer},
+  components: {FileUpload},
   methods: {
     downLoad(row) {
       console.log(row);
@@ -108,6 +110,10 @@ export default {
       });
     },
   },
+  created() {
+    this.session = JSON.parse(localStorage.getItem("session"))
+    this.userInfo = JSON.parse(localStorage.getItem("userInfo"))
+  },
   mounted() {
     let directoryName = this.directoryName;
     this.$store.dispatch("getDirectories",{directoryName}).then((res)=>{
@@ -117,6 +123,8 @@ export default {
 
   data() {
     return {
+      userInfo:{},
+      session:{},
       breadcrumbItems:[],
       currentPath: '/', // 当前路径
       directoryName: '/',
@@ -144,5 +152,9 @@ export default {
 <style>
 .el-breadcrumb-item:hover {
   cursor: pointer;
+}
+.welcome{
+  margin-bottom: 10px;
+  margin-left: 800px;
 }
 </style>

@@ -10,6 +10,7 @@
         @file-success="onFileSuccess"
         @file-progress="onFileProgress"
         @file-error="onFileError"
+        @file-text
         class="uploader-app"
       >
         <uploader-unsupport></uploader-unsupport>
@@ -31,12 +32,20 @@ export default {
   props: {
     currentPath: String
   },
-  name: "TestFileTransfer",
+  name: "FileUpload",
   data() {
     return {
+
       files: [],
       uploadOptions: {
-        target: "https://gaoyubo.cn/file/chunk",
+        statusTextMap: {
+          success: '上传成功',
+          error: '上传失败',
+          uploading: '上传中',
+          paused: '暂停中',
+          waiting: '等待中'
+        },
+        target: "https://gaoyubo.cn:8888/file/chunk",
         chunkSize: 1024 * 1024,
         testChunks: true,
         //失败后最多自动重试上传次数
@@ -69,8 +78,6 @@ export default {
     onFileProgress(rootFile, file, chunk) {},
     onFileSuccess(rootFile, file, response, chunk) {
       let res = JSON.parse(response);
-      console.log("------------")
-      console.log(response)
       if (res.code !== 205) {
         return;
       }
@@ -78,11 +85,8 @@ export default {
         const formData = new FormData();
         formData.append("identifier", file.uniqueIdentifier);
         formData.append("filename", file.name);
-        console.log("currentPath")
-        console.log(this.currentPath)
         formData.append("relativePath",this.currentPath)
         this.$store.dispatch("merge",formData).then((res)=>{
-          console.log(res)
         });
       } else {
       }

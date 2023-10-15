@@ -1,5 +1,6 @@
 //api进行统一管理
 import requests from "../utils/request";
+import {data} from "autoprefixer";
 //登录
 export const reqUserLogin = (data)=>requests({url:'user/login',data,method:'post'});
 
@@ -13,3 +14,5 @@ export const reqUploadFilePart = (data)=>requests({url:`/file/upload/`,data,meth
 export const reqMerge = (data)=>requests({url: "file/merge",data,method:'post'})
 //获取文件列表
 export const reqGetDirectories = (data)=>requests({url: `directory/directories?directoryName=${data.directoryName}`,data,method:'get'})
+//下载文件
+export const reqDownload = (data)=>requests({url: `file/download`,data,method:'post'})
