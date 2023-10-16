@@ -45,7 +45,32 @@ export default {
           paused: '暂停中',
           waiting: '等待中'
         },
+        parseTimeRemaining: function (timeRemaining, parsedTimeRemaining) {
+          return parsedTimeRemaining
+            .replace(/\syears?/, '年')
+            .replace(/\days?/, '天')
+            .replace(/\shours?/, '小时')
+            .replace(/\sminutes?/, '分钟')
+            .replace(/\sseconds?/, '秒')
+        },
+        // 用于转换文件上传状态文本映射对象
+        fileStatusText: function (status, response) {
+          // 第一个 status 为状态，第二个为响应内容
+          const statusTextMap = {
+            success: '成功',
+            error: '失败',
+            uploading: '上传中',
+            paused: '暂停',
+            waiting: '等待'
+          }
+          return statusTextMap[status]
+        },
+        speedSmoothingFactor: 0.05,
         target: "https://gaoyubo.cn:8888/file/chunk",
+        headers:{
+          "Token": localStorage.getItem("TOKEN"),
+        },
+        // 1M的块大小
         chunkSize: 1024 * 1024,
         testChunks: true,
         //失败后最多自动重试上传次数

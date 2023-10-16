@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button class="welcome">欢迎您：{{userInfo.username}}<i class="el-icon-view el-icon--right"></i> </el-button>
+    <el-button class="welcome">欢迎您：{{userInfo.username}}， VIP等级：{{userInfo.vip}}<i class="el-icon-view el-icon--right"></i> </el-button>
 
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item>
